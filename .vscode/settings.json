@@ -1,0 +1,23 @@
+{
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.autopep8",
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "editor.formatOnType": true
+  },
+  "python.formatting.provider": "autopep8",
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "prettier.documentSelectors": [".py", ".python", "python", "py", "Python"],
+  "python.testing.pytestArgs": ["."],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "files.exclude": {
+    ".git*": true,
+    ".pytest*": true,
+    "README.md": true,
+    "requirements.txt": true,
+    "thumbnail.json": true
+  }
+}
