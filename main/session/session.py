@@ -27,5 +27,8 @@ class Session:
     def draw(self, context: ContextWrapper):
         self.scene.draw(context)
 
+    def mouse_scroll(self, xoffset, yoffset) -> bool:
+        return self.scene.mouse_scroll(xoffset, yoffset)
+
     def mouse_action(self, action: MOUSE_ACTION, pos: Vec2) -> bool:
         return self.scene.mouse_action(action, pos)

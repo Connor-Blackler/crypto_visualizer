@@ -18,7 +18,7 @@ class Grid:
 
         # Grid specific variables
         self._path = None
-        self.stroke_thickness = 0.0
+        self.stroke_thickness = 0.03
         self.context_path = path_provider()(
             None, Color(255, 255, 255), None, self.stroke_thickness)
 
@@ -46,19 +46,30 @@ class Grid:
 
         start = BezierPath()
         start_c = BezierContour(False)
-        start_c.add_point(BezierPoint(Vec2(0, 0)))
-        start_c.add_point(BezierPoint(Vec2(0, 2000)))
+        start_c.add_point(BezierPoint(Vec2(-99999, -99999)))
+        start_c.add_point(BezierPoint(Vec2(-99999, 99999)))
         start.add_contour(start_c)
 
-        for x in range(0, 200):
+        start_y = BezierPath()
+        start_y_c = BezierContour(False)
+        start_y_c.add_point(BezierPoint(Vec2(-99999, -99999)))
+        start_y_c.add_point(BezierPoint(Vec2(99999, -99999)))
+        start_y.add_contour(start_y_c)
+
+        for x in range(0, 5000):
             self._path.paths.append(start)
             start = deepcopy(start)
             start.translate(Vec2(108.0, 0.0))
+
+            self._path.paths.append(start_y)
+            start_y = deepcopy(start_y)
+            start_y.translate(Vec2(0.0, 108.0))
 
         self.context_path.set_path(self._path)
 
     def draw(self, context: ContextWrapper) -> None:
         if self.regenerate:
             self.regenerate_path()
+            self.regenerate = False
 
         context.draw_path(self.context_path)

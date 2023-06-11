@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from functools import cached_property
-from shared_crypto_analysis.shared_python.shared_math.geometry import Rect, Vec2, BezierPathA, BezierContour, BezierPath, BezierPoint
+from shared_crypto_analysis.shared_python.shared_math.geometry import Rect, Vec2, BezierPathA
 from typing import overload
+from numpy import ndarray
 from skia import *
 import skia
 
@@ -10,10 +11,19 @@ class ContextPath(ABC):
     def __init__(self, path: BezierPathA, stroke=None, fill=None, stroke_thickness=1.0) -> None:
         super().__init__()
 
+        self._antialias = True
         self._path = path
         self._stroke = stroke
         self._fill = fill
         self._stroke_thickness = stroke_thickness
+
+    @property
+    def antialias(self) -> bool:
+        return self._antialias
+
+    @antialias.setter
+    def antialias(self, antialias: bool) -> None:
+        self._antialias = antialias
 
     @property
     def stroke_color(self) -> Color:
@@ -104,6 +114,26 @@ class ContextWrapper(ABC):
     def get_context_path(self) -> ContextPath:
         return ContextPath
 
+    @abstractmethod
+    def save(self) -> None:
+        pass
+
+    @abstractmethod
+    def restore(self) -> None:
+        pass
+
+    @abstractmethod
+    def scale(self, scale_factor_x: float, scale_factor_y: float) -> None:
+        pass
+
+    @abstractmethod
+    def translate(self, v: Vec2) -> None:
+        pass
+
+    @abstractmethod
+    def concat(self, matrix: ndarray) -> None:
+        pass
+
     @overload
     def draw_rect(self, r: Rect) -> None:
         pass
@@ -130,6 +160,30 @@ class ContextWrapperSkia(ContextWrapper):
         self.surface = surface
         self.paint = skia.Paint()
         self.paint.setAntiAlias(True)
+
+    def save(self) -> None:
+        self.surface.save()
+
+    def restore(self) -> None:
+        self.surface.restore()
+
+    def scale(self, scale_factor_x: float, scale_factor_y: float) -> None:
+        self.surface.scale(scale_factor_x, scale_factor_y)
+
+    def translate(self, v: Vec2) -> None:
+        self.surface.translate(v.x, v.y)
+
+    def concat(self, m: ndarray) -> None:
+        matrix_skia = Matrix()
+
+        matrix_skia.setScaleX(m[0, 0])
+        matrix_skia.setSkewX(m[0, 1])
+        matrix_skia.setTranslateX(m[0, 2])
+        matrix_skia.setSkewY(m[1, 0])
+        matrix_skia.setScaleY(m[1, 1])
+        matrix_skia.setTranslateY(m[1, 2])
+
+        self.surface.concat(matrix_skia)
 
     def get_context_path(self) -> ContextPathSkia:
         return ContextPathSkia
@@ -160,6 +214,8 @@ class ContextWrapperSkia(ContextWrapper):
         self.surface.drawRect(rect, self.paint)
 
     def draw_path(self, path: ContextPathSkia) -> None:
+        self.paint.setAntiAlias(path.antialias)
+
         for sk_path in path.path:
             if path.fill_color:
                 self.paint.setStyle(self.paint.kFill_Style)

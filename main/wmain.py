@@ -23,6 +23,8 @@ class _DrawArea:
             [Button("select", 32, 32, Color(255, 0, 0)),
              Button("delete", 32, 32, Color(0, 255, 0))])
 
+        self.mouse_pos = Vec2(0.0, 0.0)
+
     def add_shape(self, shape):
         self.session.add_shape(shape)
 
@@ -30,7 +32,13 @@ class _DrawArea:
         self.session.remove_shape(shape)
 
     def draw(self, context: ContextWrapper):
+        # Render contents of the draw area
+        # Apply the matrix transformation to the context
+        context.save()
         self.session.draw(context)
+        context.restore()
+
+        # Render UI
         self.toolbar.draw(context)
 
     def mouse_button_callback(self, window, button, action, mods):
@@ -57,10 +65,22 @@ class _DrawArea:
                 self.session.add_shape(
                     Shape.construct_circle(pos, 40, Color(50, 50, 50)))
 
+    def scroll_callback(self, window, xoffset, yoffset):
+        self.session.mouse_scroll(xoffset, yoffset)
+
     def cursor_pos_callback(self, window, xpos, ypos):
+        self.mouse_pos.x = xpos
+        self.mouse_pos.y = ypos
+
         if glfw.get_mouse_button(window, glfw.MOUSE_BUTTON_LEFT) == glfw.PRESS:
             pos = Vec2(xpos, ypos)
             self.session.mouse_action(MOUSE_ACTION.LEFT_CLICK_DRAG, pos)
+
+    def window_size_callback(self, window, width, height):
+        self.width = width
+        self.height = height
+        self.session.scene.transform.width = width
+        self.session.scene.transform.height = height
 
 
 class Wmain:
@@ -73,9 +93,15 @@ class Wmain:
         with self.glfw_window(self.width, self.height) as window:
             glfw.set_mouse_button_callback(
                 window, self.draw_area.mouse_button_callback)
-
             glfw.set_cursor_pos_callback(
                 window, self.draw_area.cursor_pos_callback)
+            glfw.set_scroll_callback(
+                window, self.draw_area.scroll_callback)
+            glfw.set_window_size_callback(
+                window, self.draw_area.window_size_callback)
+
+            width, height = glfw.get_window_size(window)
+            self.draw_area.window_size_callback(window, width, height)
 
             while not glfw.window_should_close(window):
                 GL.glClear(GL.GL_COLOR_BUFFER_BIT)
