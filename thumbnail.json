@@ -1,0 +1,7 @@
+{
+	"title": "Crypto Visualizer",
+	"image": "https://i0.wp.com/www.eastmojo.com/wp-content/uploads/2022/09/Untitled-design-72.png?fit=1200%2C675&ssl=1",
+	"description": "A front-end application that acts as a visualizer for the crypto market; shows indicators, High / low / close prices etc. Written with vector graphics for scalability and precision ",
+	"language": ["Python","OpenGL","Numpy"],
+	"language_bg": ["#3572A5","#5586A4","#013243"]
+}
