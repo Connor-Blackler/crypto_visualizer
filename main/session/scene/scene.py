@@ -157,7 +157,7 @@ class Scene:
 
             case MOUSE_ACTION.RIGHT_CLICK_UP:
                 self.add_shape(
-                    Shape.construct_polygon(transformed_pos + Vec2(60, 60), 40, 7, Color(50, 50, 50)))
+                    Shape.construct_polygon(transformed_pos + Vec2(60, 60), 40, 6, Color(50, 50, 50)))
 
                 self.add_shape(
                     Shape.construct_circle(transformed_pos, 40, Color(50, 50, 50)))

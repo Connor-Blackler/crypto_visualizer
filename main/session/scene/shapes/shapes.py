@@ -102,24 +102,3 @@ class Shape:
 
         contour.closed = True
         return ret
-
-
-class ShapeCircle(Shape):
-    def __init__(self, pos: Vec2, radius: float, color: Color):
-        super(Shape, self).__init__()
-
-        self.pos = pos
-        self.radius = radius
-        self.color = color
-
-    def contains(self, pos: Vec2):
-        distance = ((pos.x - self.pos.x) ** 2 +
-                    (pos.y - self.pos.y) ** 2) ** 0.5
-        return distance <= self.radius
-
-    def translate(self, pos: Vec2):
-        self.pos.translate(pos)
-
-    def draw(self, context: ContextWrapper):
-        context.set_color(self.color)
-        context.draw_circle(self.pos, self.radius)
