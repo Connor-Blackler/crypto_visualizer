@@ -44,6 +44,7 @@ class Transform:
 
     def mouse_scroll(self, xoffset, yoffset) -> bool:
         self.scale_factor += yoffset / 10.0
+        self.scale_factor = max(0.3, self.scale_factor)
         return True
 
     def matrix(self) -> np.ndarray:
@@ -135,7 +136,7 @@ class Scene:
             case MOUSE_ACTION.LEFT_CLICK_DRAG:
                 if self._selected is None:
                     pan_offset = pos - self._pan_start_pos
-                    self._transform.apply_pan(pan_offset)
+                    self.transform.apply_pan(pan_offset)
                     # Update the start position for continuous panning
                     self._pan_start_pos = pos
 

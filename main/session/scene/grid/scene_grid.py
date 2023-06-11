@@ -60,24 +60,29 @@ class Grid:
 
         start = BezierPath()
         start_c = BezierContour(False)
-        start_c.add_point(BezierPoint(Vec2(-99999, -99999)))
-        start_c.add_point(BezierPoint(Vec2(-99999, 99999)))
+        start_c.add_point(BezierPoint(
+            Vec2(-self._transform.width, -self._transform.height)))
+        start_c.add_point(BezierPoint(
+            Vec2(-self._transform.width, self._transform.height)))
         start.add_contour(start_c)
 
         start_y = BezierPath()
         start_y_c = BezierContour(False)
-        start_y_c.add_point(BezierPoint(Vec2(-99999, -99999)))
-        start_y_c.add_point(BezierPoint(Vec2(99999, -99999)))
+        start_y_c.add_point(BezierPoint(
+            Vec2(-self._transform.width, -self._transform.height)))
+        start_y_c.add_point(BezierPoint(
+            Vec2(self._transform.width, -self._transform.height)))
         start_y.add_contour(start_y_c)
 
-        for x in range(0, 5000):
+        for x in range(0, self._transform.width * 2, self.grid_width):
             self._path.paths.append(start)
             start = deepcopy(start)
-            start.translate(Vec2(108.0, 0.0))
+            start.translate(Vec2(self.grid_width, 0.0))
 
+        for y in range(0, self._transform.width * 2, self.grid_width):
             self._path.paths.append(start_y)
             start_y = deepcopy(start_y)
-            start_y.translate(Vec2(0.0, 108.0))
+            start_y.translate(Vec2(0.0, self.grid_width))
 
         self._context_path.set_path(self._path)
 
