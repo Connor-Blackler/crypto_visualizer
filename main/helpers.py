@@ -6,6 +6,7 @@ class MOUSE_ACTION(Enum):
     LEFT_CLICK_DRAG = auto(),
     LEFT_CLICK_UP = auto(),
     RIGHT_CLICK_DOWN = auto(),
+    RIGHT_CLICK_UP = auto(),
 
 
 class Color():

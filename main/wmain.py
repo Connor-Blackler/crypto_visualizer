@@ -10,7 +10,6 @@ from .ui_classes.button import Button
 from .ui_classes.toolbar import Toolbar
 from .helpers import MOUSE_ACTION, Color
 from .session.session import Session
-from .session.scene.shapes.shapes import Shape
 
 
 class _DrawArea:
@@ -33,7 +32,6 @@ class _DrawArea:
 
     def draw(self, context: ContextWrapper):
         # Render contents of the draw area
-        # Apply the matrix transformation to the context
         context.save()
         self.session.draw(context)
         context.restore()
@@ -58,12 +56,13 @@ class _DrawArea:
                 self.session.mouse_action(MOUSE_ACTION.LEFT_CLICK_UP, pos)
 
         if button == glfw.MOUSE_BUTTON_RIGHT:
-            if action == glfw.RELEASE:
-                self.session.add_shape(
-                    Shape.construct_polygon(pos + Vec2(60, 60), 40, 7, Color(50, 50, 50)))
+            if action == glfw.PRESS:
+                self.session.mouse_action(
+                    MOUSE_ACTION.RIGHT_CLICK_DOWN, pos)
 
-                self.session.add_shape(
-                    Shape.construct_circle(pos, 40, Color(50, 50, 50)))
+            if action == glfw.RELEASE:
+                self.session.mouse_action(
+                    MOUSE_ACTION.RIGHT_CLICK_UP, pos)
 
     def scroll_callback(self, window, xoffset, yoffset):
         self.session.mouse_scroll(xoffset, yoffset)

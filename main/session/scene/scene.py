@@ -1,7 +1,7 @@
 import numpy as np
 from shared_crypto_analysis.shared_python.shared_math.geometry import Vec2
 from ...context_wrapper import ContextWrapper
-from ...helpers import MOUSE_ACTION
+from ...helpers import MOUSE_ACTION, Color
 from .shapes.shapes import Shape
 from .grid.scene_grid import Grid
 
@@ -46,7 +46,7 @@ class Transform:
         self.scale_factor += yoffset / 10.0
         return True
 
-    def matrix(self):
+    def matrix(self) -> np.ndarray:
         pan_center = Vec2(self.width / 2, self.height / 2)
         zoomed_pan_offset = self.pan_offset
 
@@ -79,26 +79,27 @@ class Transform:
 
 class Scene:
     def __init__(self):
-        self.shapes = []
-        self.draggable = None
-        self.selected = None
+        self._shapes = []
+        self._draggable = None
+        self._selected = None
+
+        # core scene classes
         self.transform = Transform()
+        self.grid = Grid(self.transform)
 
         # Zoom
-        self.scale_factor = 1.0
-        self.matrix = np.identity(3)
-        self.zoom_center = Vec2(0.0, 0.0)
+        self._scale_factor = 1.0
+        self._matrix = np.identity(3)
+        self._zoom_center = Vec2(0.0, 0.0)
 
-        self.mouse_pos = Vec2(0.0, 0.0)
-        self.pan_start_pos = Vec2(0.0, 0.0)
-
-        self.grid = Grid()
+        self._mouse_pos = Vec2(0.0, 0.0)
+        self._pan_start_pos = Vec2(0.0, 0.0)
 
     def add_shape(self, shape):
-        self.shapes.append(shape)
+        self._shapes.append(shape)
 
     def remove_shape(self, shape):
-        self.shapes.remove(shape)
+        self._shapes.remove(shape)
 
     def draw(self, context: ContextWrapper):
         context.save()
@@ -106,7 +107,7 @@ class Scene:
 
         self.grid.draw(context)
 
-        for shape in self.shapes:
+        for shape in self._shapes:
             shape.draw(context)
 
         context.restore()
@@ -115,30 +116,47 @@ class Scene:
         return self.transform.mouse_scroll(xoffset, yoffset)
 
     def mouse_action(self, action: MOUSE_ACTION, pos: Vec2) -> bool:
+        # Apply inverse transformation to the mouse position
+        inverse_matrix = np.linalg.inv(self.transform.matrix())
+        transformed_pos = np.dot(inverse_matrix, [pos.x, pos.y, 1.0])
+        transformed_pos = Vec2(transformed_pos[0], transformed_pos[1])
+
         match action:
             case MOUSE_ACTION.LEFT_CLICK_DOWN:
-                if self.selected is None:
-                    for this_shape in self.shapes:
-                        if this_shape.contains(pos):
-                            self.selected = this_shape
+                if self._selected is None:
+                    for this_shape in self._shapes:
+                        if this_shape.contains(transformed_pos):
+                            self._selected = this_shape
                             return True
 
                  # Store the initial position for panning
-                self.pan_start_pos = pos
+                self._pan_start_pos = pos
 
             case MOUSE_ACTION.LEFT_CLICK_DRAG:
-                if self.selected is None:
-                    pan_offset = pos - self.pan_start_pos
-                    self.transform.apply_pan(pan_offset)
-                    self.pan_start_pos = pos  # Update the start position for continuous panning
+                if self._selected is None:
+                    pan_offset = pos - self._pan_start_pos
+                    self._transform.apply_pan(pan_offset)
+                    # Update the start position for continuous panning
+                    self._pan_start_pos = pos
 
                     return True
 
-                if self.draggable is None:
-                    self.draggable = draggable(pos, self.selected)
+                if self._draggable is None:
+                    self._draggable = draggable(
+                        transformed_pos, self._selected)
                 else:
-                    self.draggable.work(pos)
+                    self._draggable.work(transformed_pos)
 
             case MOUSE_ACTION.LEFT_CLICK_UP:
-                self.draggable = None
-                self.selected = None
+                self._draggable = None
+                self._selected = None
+
+            case MOUSE_ACTION.RIGHT_CLICK_DOWN:
+                pass
+
+            case MOUSE_ACTION.RIGHT_CLICK_UP:
+                self.add_shape(
+                    Shape.construct_polygon(transformed_pos + Vec2(60, 60), 40, 7, Color(50, 50, 50)))
+
+                self.add_shape(
+                    Shape.construct_circle(transformed_pos, 40, Color(50, 50, 50)))
